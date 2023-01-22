@@ -190,8 +190,7 @@ def parallel_async(async_iterable: AsyncIterable, count: int, callable: Callable
     """ Like parallel but for async iterators """
     coop = Cooperator()
     work = _AsyncCooperatorAdapter(async_iterable, callable, *args, **named)
-    dl = DeferredList([coop.coiterate(work) for _ in range(count)])
-    return dl
+    return DeferredList([coop.coiterate(work) for _ in range(count)])
 
 
 def process_chain(callbacks: Iterable[Callable], input, *a, **kw) -> Deferred:
@@ -347,6 +346,4 @@ def maybe_deferred_to_future(d: Deferred) -> Union[Deferred, Future]:
                 d = treq.get('https://example.com/additional')
                 extra_response = await maybe_deferred_to_future(d)
     """
-    if not is_asyncio_reactor_installed():
-        return d
-    return deferred_to_future(d)
+    return deferred_to_future(d) if is_asyncio_reactor_installed() else d

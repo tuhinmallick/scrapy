@@ -35,8 +35,7 @@ class SpiderMiddlewareTestCase(TestCase):
         results = []
         dfd.addBoth(results.append)
         self._wait(dfd)
-        ret = results[0]
-        return ret
+        return results[0]
 
 
 class ProcessSpiderInputInvalidOutput(SpiderMiddlewareTestCase):
@@ -134,8 +133,11 @@ class BaseAsyncSpiderMiddlewareTestCase(SpiderMiddlewareTestCase):
         self.crawler = get_crawler(Spider, {'SPIDER_MIDDLEWARES_BASE': {}, 'SPIDER_MIDDLEWARES': setting})
         self.spider = self.crawler._create_spider('foo')
         self.mwman = SpiderMiddlewareManager.from_crawler(self.crawler)
-        result = yield self.mwman.scrape_response(self._scrape_func, self.response, self.request, self.spider)
-        return result
+        return (
+            yield self.mwman.scrape_response(
+                self._scrape_func, self.response, self.request, self.spider
+            )
+        )
 
     @defer.inlineCallbacks
     def _test_simple_base(self, *mw_classes, downgrade: bool = False, start_index: Optional[int] = None):
@@ -160,8 +162,7 @@ class BaseAsyncSpiderMiddlewareTestCase(SpiderMiddlewareTestCase):
 
 class ProcessSpiderOutputSimpleMiddleware:
     def process_spider_output(self, response, result, spider):
-        for r in result:
-            yield r
+        yield from result
 
 
 class ProcessSpiderOutputAsyncGenMiddleware:
@@ -172,8 +173,7 @@ class ProcessSpiderOutputAsyncGenMiddleware:
 
 class ProcessSpiderOutputUniversalMiddleware:
     def process_spider_output(self, response, result, spider):
-        for r in result:
-            yield r
+        yield from result
 
     async def process_spider_output_async(self, response, result, spider):
         async for r in result:
@@ -292,10 +292,7 @@ class ProcessSpiderOutputNonIterableMiddleware:
 
 class ProcessSpiderOutputCoroutineMiddleware:
     async def process_spider_output(self, response, result, spider):
-        results = []
-        for r in result:
-            results.append(r)
-        return results
+        return list(result)
 
 
 class ProcessSpiderOutputInvalidResult(BaseAsyncSpiderMiddlewareTestCase):
@@ -326,8 +323,7 @@ class ProcessSpiderOutputInvalidResult(BaseAsyncSpiderMiddlewareTestCase):
 
 class ProcessStartRequestsSimpleMiddleware:
     def process_start_requests(self, start_requests, spider):
-        for r in start_requests:
-            yield r
+        yield from start_requests
 
 
 class ProcessStartRequestsSimple(BaseAsyncSpiderMiddlewareTestCase):
@@ -347,8 +343,7 @@ class ProcessStartRequestsSimple(BaseAsyncSpiderMiddlewareTestCase):
         self.spider = self.crawler._create_spider('foo')
         self.mwman = SpiderMiddlewareManager.from_crawler(self.crawler)
         start_requests = iter(self._start_requests())
-        results = yield self.mwman.process_start_requests(start_requests, self.spider)
-        return results
+        return (yield self.mwman.process_start_requests(start_requests, self.spider))
 
     def test_simple(self):
         """ Simple mw """
@@ -432,8 +427,11 @@ class BuiltinMiddlewareSimpleTest(BaseAsyncSpiderMiddlewareTestCase):
         self.crawler = get_crawler(Spider, {'SPIDER_MIDDLEWARES': setting})
         self.spider = self.crawler._create_spider('foo')
         self.mwman = SpiderMiddlewareManager.from_crawler(self.crawler)
-        result = yield self.mwman.scrape_response(self._scrape_func, self.response, self.request, self.spider)
-        return result
+        return (
+            yield self.mwman.scrape_response(
+                self._scrape_func, self.response, self.request, self.spider
+            )
+        )
 
     def test_just_builtin(self):
         return self._test_simple_base()

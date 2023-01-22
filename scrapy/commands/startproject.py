@@ -91,11 +91,7 @@ class Command(ScrapyCommand):
 
         project_name = args[0]
 
-        if len(args) == 2:
-            project_dir = Path(args[1])
-        else:
-            project_dir = Path(args[0])
-
+        project_dir = Path(args[1]) if len(args) == 2 else Path(args[0])
         if (project_dir / 'scrapy.cfg').exists():
             self.exitcode = 1
             print(f'Error: scrapy.cfg already exists in {project_dir.resolve()}')

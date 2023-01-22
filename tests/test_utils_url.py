@@ -40,7 +40,9 @@ class UrlUtilsTest(unittest.TestCase):
             'javascript:%20document.orderform_2581_1190810811.submit%28%29'
         )
         self.assertFalse(url_is_from_any_domain(url, ['testdomain.com']))
-        self.assertFalse(url_is_from_any_domain(url + '.testdomain.com', ['testdomain.com']))
+        self.assertFalse(
+            url_is_from_any_domain(f'{url}.testdomain.com', ['testdomain.com'])
+        )
 
     def test_url_is_from_spider(self):
         spider = Spider(name='example.com')
@@ -84,7 +86,7 @@ class UrlUtilsTest(unittest.TestCase):
         self.assertFalse(url_is_from_spider('http://www.example.us/some/page.html', MySpider))
 
     def test_url_has_any_extension(self):
-        deny_extensions = {'.' + e for e in arg_to_iter(IGNORED_EXTENSIONS)}
+        deny_extensions = {f'.{e}' for e in arg_to_iter(IGNORED_EXTENSIONS)}
         self.assertTrue(url_has_any_extension("http://www.example.com/archive.tar.gz", deny_extensions))
         self.assertTrue(url_has_any_extension("http://www.example.com/page.doc", deny_extensions))
         self.assertTrue(url_has_any_extension("http://www.example.com/page.pdf", deny_extensions))
@@ -231,8 +233,7 @@ def create_guess_scheme_t(args):
 def create_skipped_scheme_t(args):
     def do_expected(self):
         raise unittest.SkipTest(args[2])
-        url = guess_scheme(args[0])
-        assert url.startswith(args[1])
+
     return do_expected
 
 

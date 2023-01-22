@@ -147,10 +147,14 @@ class StartprojectTest(ProjectTest):
         assert Path(project_dir, self.project_name, 'settings.py').exists()
         assert Path(project_dir, self.project_name, 'spiders', '__init__.py').exists()
 
-        self.assertEqual(0, self.call('startproject', self.project_name, project_dir + '2'))
+        self.assertEqual(
+            0, self.call('startproject', self.project_name, f'{project_dir}2')
+        )
 
         self.assertEqual(1, self.call('startproject', self.project_name, project_dir))
-        self.assertEqual(1, self.call('startproject', self.project_name + '2', project_dir))
+        self.assertEqual(
+            1, self.call('startproject', f'{self.project_name}2', project_dir)
+        )
         self.assertEqual(1, self.call('startproject', 'wrong---project---name'))
         self.assertEqual(1, self.call('startproject', 'sys'))
         self.assertEqual(2, self.call('startproject'))
@@ -158,7 +162,7 @@ class StartprojectTest(ProjectTest):
 
     def test_existing_project_dir(self):
         project_dir = mkdtemp()
-        project_name = self.project_name + '_existing'
+        project_name = f'{self.project_name}_existing'
         project_path = Path(project_dir, project_name)
         project_path.mkdir()
 
@@ -531,7 +535,7 @@ class GenspiderStandaloneCommandTest(ProjectTest):
 
     def test_same_name_as_existing_file(self, force=False):
         file_name = 'example'
-        file_path = Path(self.temp_path, file_name + '.py')
+        file_path = Path(self.temp_path, f'{file_name}.py')
         p, out, err = self.proc('genspider', file_name, 'example.com')
         self.assertIn(f"Created spider {file_name!r} using template \'basic\' ", out)
         assert file_path.exists()
@@ -548,7 +552,10 @@ class GenspiderStandaloneCommandTest(ProjectTest):
             self.assertNotEqual(file_contents_after, file_contents_before)
         else:
             p, out, err = self.proc('genspider', file_name, 'example.com')
-            self.assertIn(f"{Path(self.temp_path, file_name + '.py').resolve()} already exists", out)
+            self.assertIn(
+                f"{Path(self.temp_path, f'{file_name}.py').resolve()} already exists",
+                out,
+            )
             modify_time_after = file_path.stat().st_mtime
             self.assertEqual(modify_time_after, modify_time_before)
             file_contents_after = file_path.read_text(encoding="utf-8")

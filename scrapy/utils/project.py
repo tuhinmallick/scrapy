@@ -32,11 +32,10 @@ def project_data_dir(project='default') -> str:
     cfg = get_config()
     if cfg.has_option(DATADIR_CFG_SECTION, project):
         d = Path(cfg.get(DATADIR_CFG_SECTION, project))
-    else:
-        scrapy_cfg = closest_scrapy_cfg()
-        if not scrapy_cfg:
-            raise NotConfigured("Unable to find scrapy.cfg file to infer project data dir")
+    elif scrapy_cfg := closest_scrapy_cfg():
         d = (Path(scrapy_cfg).parent / '.scrapy').resolve()
+    else:
+        raise NotConfigured("Unable to find scrapy.cfg file to infer project data dir")
     if not d.exists():
         d.mkdir(parents=True)
     return str(d)
@@ -64,8 +63,7 @@ def get_project_settings():
         init_env(project)
 
     settings = Settings()
-    settings_module_path = os.environ.get(ENVVAR)
-    if settings_module_path:
+    if settings_module_path := os.environ.get(ENVVAR):
         settings.setmodule(settings_module_path, priority='project')
 
     valid_envvars = {

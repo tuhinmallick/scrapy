@@ -23,7 +23,7 @@ def send_catch_log(signal=Any, sender=Anonymous, *arguments, **named):
     dont_log = named.pop('dont_log', ())
     dont_log = tuple(dont_log) if isinstance(dont_log, collections.abc.Sequence) else (dont_log,)
     dont_log += (StopDownload, )
-    spider = named.get('spider', None)
+    spider = named.get('spider')
     responses = []
     for receiver in liveReceivers(getAllReceivers(sender, signal)):
         try:
@@ -58,7 +58,7 @@ def send_catch_log_deferred(signal=Any, sender=Anonymous, *arguments, **named):
         return failure
 
     dont_log = named.pop('dont_log', None)
-    spider = named.get('spider', None)
+    spider = named.get('spider')
     dfds = []
     for receiver in liveReceivers(getAllReceivers(sender, signal)):
         d = maybeDeferred_coro(robustApply, receiver, signal=signal, sender=sender, *arguments, **named)
