@@ -20,7 +20,7 @@ def sanitize_module_name(module_name):
     """
     module_name = module_name.replace('-', '_').replace('.', '_')
     if module_name[0] not in string.ascii_letters:
-        module_name = "a" + module_name
+        module_name = f"a{module_name}"
     return module_name
 
 
@@ -61,14 +61,13 @@ class Command(ScrapyCommand):
             self._list_templates()
             return
         if opts.dump:
-            template_file = self._find_template(opts.dump)
-            if template_file:
+            if template_file := self._find_template(opts.dump):
                 print(template_file.read_text(encoding="utf-8"))
             return
         if len(args) != 2:
             raise UsageError()
 
-        name, url = args[0:2]
+        name, url = args[:2]
         domain = extract_domain(url)
         module = sanitize_module_name(name)
 
@@ -79,8 +78,7 @@ class Command(ScrapyCommand):
         if not opts.force and self._spider_exists(name):
             return
 
-        template_file = self._find_template(opts.template)
-        if template_file:
+        if template_file := self._find_template(opts.template):
             self._genspider(module, name, domain, opts.template, template_file)
             if opts.edit:
                 self.exitcode = os.system(f'scrapy edit "{name}"')
@@ -127,7 +125,7 @@ class Command(ScrapyCommand):
     def _spider_exists(self, name: str) -> bool:
         if not self.settings.get('NEWSPIDER_MODULE'):
             # if run as a standalone command and file with same filename already exists
-            path = Path(name + ".py")
+            path = Path(f"{name}.py")
             if path.exists():
                 print(f"{path.resolve()} already exists")
                 return True
@@ -151,7 +149,7 @@ class Command(ScrapyCommand):
         spiders_module = import_module(self.settings['NEWSPIDER_MODULE'])
         spiders_dir = Path(cast(str, spiders_module.__file__)).parent
         spiders_dir_abs = spiders_dir.resolve()
-        path = spiders_dir_abs / (name + ".py")
+        path = spiders_dir_abs / f"{name}.py"
         if path.exists():
             print(f"{path} already exists")
             return True

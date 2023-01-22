@@ -67,7 +67,7 @@ def get_crawler(spidercls=None, settings_dict=None, prevent_warnings=True):
     settings = {}
     if prevent_warnings:
         settings['REQUEST_FINGERPRINTER_IMPLEMENTATION'] = '2.7'
-    settings.update(settings_dict or {})
+    settings |= (settings_dict or {})
     runner = CrawlerRunner(settings)
     return runner.create_crawler(spidercls or Spider)
 

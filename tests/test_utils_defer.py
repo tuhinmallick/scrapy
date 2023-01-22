@@ -105,8 +105,7 @@ class IterErrbackTest(unittest.TestCase):
 
     def test_iter_errback_good(self):
         def itergood():
-            for x in range(10):
-                yield x
+            yield from range(10)
 
         errors = []
         out = list(iter_errback(itergood(), errors.append))
@@ -217,8 +216,7 @@ class AsyncCooperatorTest(unittest.TestCase):
         for length in [20, 50, 100]:
             results = []
             ait = self.get_async_iterable(length)
-            dl = parallel_async(ait, self.CONCURRENT_ITEMS, self.callable, results)
-            yield dl
+            yield parallel_async(ait, self.CONCURRENT_ITEMS, self.callable, results)
             self.assertEqual(list(range(length)), sorted(results))
 
     @defer.inlineCallbacks
@@ -226,6 +224,5 @@ class AsyncCooperatorTest(unittest.TestCase):
         for length in [20, 50, 100]:
             results = []
             ait = self.get_async_iterable_with_delays(length)
-            dl = parallel_async(ait, self.CONCURRENT_ITEMS, self.callable, results)
-            yield dl
+            yield parallel_async(ait, self.CONCURRENT_ITEMS, self.callable, results)
             self.assertEqual(list(range(length)), sorted(results))

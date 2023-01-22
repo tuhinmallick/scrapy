@@ -14,10 +14,9 @@ def top_level_return_something():
     """
 docstring
     """
-    url = """
+    yield """
 https://example.org
 """
-    yield url
     return 1
 
 
@@ -25,10 +24,9 @@ def top_level_return_none():
     """
 docstring
     """
-    url = """
+    yield """
 https://example.org
 """
-    yield url
     return
 
 
@@ -62,10 +60,9 @@ class UtilsMiscPy3TestCase(unittest.TestCase):
             """
 docstring
             """
-            url = """
+            yield """
 https://example.org
         """
-            yield url
             return 1
 
         assert is_generator_with_return_value(top_level_return_something)
@@ -123,10 +120,9 @@ https://example.org
             """
 docstring
             """
-            url = """
+            yield """
 https://example.org
         """
-            yield url
             return
 
         def l2():
@@ -205,10 +201,9 @@ https://example.org
             """
 docstring
             """
-            url = """
+            yield """
 https://example.org
         """
-            yield url
             return
 
         @decorator

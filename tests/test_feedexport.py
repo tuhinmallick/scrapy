@@ -67,7 +67,7 @@ def printf_escape(string):
 def build_url(path: Union[str, PathLike]) -> str:
     path_str = str(path)
     if path_str[0] != '/':
-        path_str = '/' + path_str
+        path_str = f'/{path_str}'
     return urljoin('file:', path_str)
 
 
@@ -132,12 +132,12 @@ class FileFeedStorageTest(unittest.TestCase):
 class FTPFeedStorageTest(unittest.TestCase):
 
     def get_test_spider(self, settings=None):
+
         class TestSpider(scrapy.Spider):
             name = 'test_spider'
 
         crawler = get_crawler(settings_dict=settings)
-        spider = TestSpider.from_crawler(crawler)
-        return spider
+        return TestSpider.from_crawler(crawler)
 
     def _store(self, uri, content, feed_options=None, settings=None):
         crawler = get_crawler(settings_dict=settings or {})
@@ -209,12 +209,12 @@ class FTPFeedStorageTest(unittest.TestCase):
 class BlockingFeedStorageTest(unittest.TestCase):
 
     def get_test_spider(self, settings=None):
+
         class TestSpider(scrapy.Spider):
             name = 'test_spider'
 
         crawler = get_crawler(settings_dict=settings)
-        spider = TestSpider.from_crawler(crawler)
-        return spider
+        return TestSpider.from_crawler(crawler)
 
     def test_default_temp_dir(self):
         b = BlockingFeedStorage()
@@ -629,15 +629,16 @@ class FeedExportTestBase(ABC, unittest.TestCase):
         Return exported data which a spider yielding ``items`` would return.
         """
 
+
+
         class TestSpider(scrapy.Spider):
             name = 'testspider'
 
             def parse(self, response):
-                for item in items:
-                    yield item
+                yield from items
 
-        data = yield self.run_and_export(TestSpider, settings)
-        return data
+
+        return (yield self.run_and_export(TestSpider, settings))
 
     @defer.inlineCallbacks
     def exported_no_data(self, settings):
@@ -651,8 +652,7 @@ class FeedExportTestBase(ABC, unittest.TestCase):
             def parse(self, response):
                 pass
 
-        data = yield self.run_and_export(TestSpider, settings)
-        return data
+        return (yield self.run_and_export(TestSpider, settings))
 
     @defer.inlineCallbacks
     def assertExported(self, items, header, rows, settings=None):
@@ -1080,17 +1080,19 @@ class FeedExportTest(FeedExportTestBase):
             def accepts(self, item):
                 return isinstance(item, MyItem)
 
+
+
         class CustomFilter2(scrapy.extensions.feedexport.ItemFilter):
             def accepts(self, item):
-                if 'foo' not in item.fields:
-                    return False
-                return True
+                return 'foo' in item.fields
+
+
+
 
         class CustomFilter3(scrapy.extensions.feedexport.ItemFilter):
             def accepts(self, item):
-                if isinstance(item, tuple(self.item_classes)) and item['foo'] == "bar1":
-                    return True
-                return False
+                return isinstance(item, tuple(self.item_classes)) and item['foo'] == "bar1"
+
 
         formats = {
             'json': b'[\n{"foo": "bar1", "egg": "spam1"}\n]',
@@ -2369,12 +2371,14 @@ class BatchDeliveriesTest(FeedExportTestBase):
         storage = S3FeedStorage.from_crawler(crawler, uri)
         verifyObject(IFeedStorage, storage)
 
+
+
         class TestSpider(scrapy.Spider):
             name = 'testspider'
 
             def parse(self, response):
-                for item in items:
-                    yield item
+                yield from items
+
 
         with MockServer() as server:
             TestSpider.start_urls = [server.url('/')]
